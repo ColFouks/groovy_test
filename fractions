@@ -1,0 +1,107 @@
+class Fraction {     
+    def int nominator,denominator,ciel_p,nominator_p;
+
+    Fraction(int nominator, int denominator) {
+        this.nominator = nominator
+        this.denominator = denominator
+    }
+    def factorize = { long target -> 
+     
+        if (target == 1) return [1L]
+     
+        if (target < 4) return [1L, target]
+     
+        def targetSqrt = Math.sqrt(target)
+        def lowfactors = (2L..targetSqrt).grep { (target % it) == 0 }
+        if (lowfactors == []) return [1L, target]
+        def nhalf = lowfactors.size() - ((lowfactors[-1] == targetSqrt) ? 1 : 0)
+     
+        [1] + lowfactors + (0..<nhalf).collect { target.intdiv(lowfactors[it]) }.reverse() + [target]
+    }
+    public String toString(){
+        if (this.nominator > this.denominator){
+            ciel_p = Math.floor(this.nominator/this.denominator)
+            nominator_p = this.nominator - this.denominator*ciel_p
+        }
+        if (ciel_p){
+        return ciel_p + " " + nominator_p + "/" + denominator;
+        }
+        else{
+        return nominator + "/" + denominator;
+        }
+    }
+    public int common_denom(int left, int right){
+        def factors_left = factorize(left)
+        def factors_right = factorize(right)
+        def common_den = factors_left.intersect(factors_right).remove('1')
+        if (!common_den){
+            common_den = left*right
+        }
+        return common_den
+    }
+    public String cut(int nom, int denom){
+        def new_nominator=nom
+        def new_denominator = denom
+        if (new_nominator > new_denominator){
+             def int new_ciel = Math.floor(new_nominator/new_denominator)
+             new_nominator = new_nominator - new_denominator*new_ciel
+             def nom_f = factorize(new_nominator)
+             def denom_f = factorize(new_denominator)
+             def new_common_f = denom_f.intersect(nom_f)
+             if (new_common_f){
+                 new_common_f = new_common_f.sort().reverse(true)[0]
+                 new_nominator = new_nominator/new_common_f
+                 new_denominator = new_denominator/new_common_f
+             }
+             return new_ciel + " " + new_nominator + "/" + new_denominator;
+        }
+        else{
+             def nom_f = factorize(new_nominator)
+             def denom_f = factorize(new_denominator)
+             def new_common_f = denom_f.intersect(nom_f)
+             if (new_common_f){
+                 new_common_f = new_common_f.sort().reverse(true)[0]
+                 new_nominator = new_nominator/new_common_f
+                 new_denominator = new_denominator/new_common_f
+             }        
+             return new_nominator + "/" + new_denominator;
+        }   
+    }
+    public String plus(Fraction f_pl){
+        def int common_denominator, new_nominator, new_denominator;
+        def int common_f = common_denom(denominator,f_pl.denominator)
+        
+        if (f_pl.denominator != denominator){
+            def nom_left = (nominator*common_f)/denominator
+            def nom_right = (f_pl.nominator*common_f)/f_pl.denominator
+            new_nominator = nom_left+nom_right
+            new_denominator = common_f;
+        }
+        else{
+            new_denominator = denominator
+            new_nominator = f_pl.nominator + nominator
+        }
+        return cut(new_nominator,new_denominator)
+    }
+    public String minus(Fraction f_pl){
+        def f_pl_tmp = Fraction.newInstance(-f_pl.nominator,f_pl.denominator)        
+        return this.plus(f_pl_tmp)
+    }    
+    public String multiply(Fraction f_pl){
+        def int new_nominator, new_denominator;
+        new_nominator = nominator * f_pl.nominator
+        new_denominator = denominator * f_pl.denominator
+        return cut(new_nominator,new_denominator)
+    }
+  
+    public String div(Fraction f_pl){
+        def f_pl_tmp = Fraction.newInstance(f_pl.denominator,f_pl.nominator)        
+        return this.multiply(f_pl_tmp)
+    }
+}
+def first = Fraction.newInstance(2,3)
+def second = Fraction.newInstance(1,4)
+assert first+second == "11/12"
+assert first-second == "5/12"
+assert first*second == "1/6"
+assert first/second == "2 2/3"
