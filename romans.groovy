@@ -36,4 +36,7 @@ class Romans {
         return this.out_num
     }
 }
-def n = Romans.newInstance("XL")
+def k = Romans.newInstance(140)
+assert k.toString() == "CXL"
+def n = Romans.newInstance("CXL")
+assert n.toString() == 140.toString()
